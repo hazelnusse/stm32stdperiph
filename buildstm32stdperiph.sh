@@ -37,7 +37,7 @@ cd ${SOURCES}
 fetch ${STM32} http://www.st.com/internet/com/SOFTWARE_RESOURCES/SW_COMPONENT/FIRMWARE/stm32f10x_stdperiph_lib.zip
 cd ${SUMMON_DIR}
 
-unzip -f ${SOURCES}/stm32f10x_stdperiph_lib.zip
+unzip -u ${SOURCES}/stm32f10x_stdperiph_lib.zip
 log "Successfully downloaded and extracted ${STM32}"
 
 # Build process
@@ -52,8 +52,8 @@ INCLUDES="-I${CMSIS_CORE} -I${CMSIS_DEVICE} -I${STM32_PERIPH}/inc"
 CFLAGS="-fno-common -Os -g -mcpu=cortex-m3 -mthumb -ffunction-sections -fdata-sections -Dassert_param(expr)=((void)0) -Wall"
 #DEVICE="-DSTM32F10X_MD"  # For Medium Density Line Devices
 DEVICE="-DSTM32F10X_CL"   # For Connectivity Line Devices
-
 ARFLAGS=rcsv
+
 for file in ${CMSIS_CORE}/*.c ${CMSIS_DEVICE}/*.c ${STM32_PERIPH}/src/*.c
 do
     ${CC} ${CFLAGS} ${INCLUDES} ${DEVICE} -c ${file}
@@ -62,5 +62,11 @@ done
 
 ${AR} ${ARFLAGS} libstm32.a *.o
 echo "Created libstm32.a"
+rm *.o
+mkdir -p lib inc src
+mv -f libstm32.a lib
+cp -f ${CMSIS_CORE}/*.h ${CMSIS_DEVICE}/*.h ${STM32_PERIPH}/inc/*.h inc
+cp -f ${CMSIS_CORE}/*.c ${CMSIS_DEVICE}/*.c ${STM32_PERIPH}/src/*.c src
+echo "Headers are in build/inc, library is in build/libs, source is in build/src (just in case)"
 
 cd ${SUMMON_DIR}
